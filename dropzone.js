@@ -1,3 +1,5 @@
+'use strict';
+
 window.dropzone = function(selector, options) {
 
   /**********************************************
@@ -9,6 +11,7 @@ window.dropzone = function(selector, options) {
       deniedClass = options.deniedClass || '',
       dropzone = document.querySelector(selector),
       loadend = options.onloadend,
+      loadstart = options.onloadstart,
       droppedFilesArray = [];
 
   /**********************************************
@@ -28,13 +31,13 @@ window.dropzone = function(selector, options) {
   dropzone.addEventListener('drop', function(e) {
     e.preventDefault();
 
-    watchIfFilesAreStillLoading(filesFound => {
+    watchIfFilesAreStillLoading(function() {
+      dropzone.classList.add(droppedClass);
       loadend(droppedFilesArray);
     });
 
-    for(let item of e.dataTransfer.items) {
+    for(let item of e.dataTransfer.items)
       traverseFileTree(item.webkitGetAsEntry())
-    }
 
   });
 
@@ -51,7 +54,7 @@ window.dropzone = function(selector, options) {
           arrayInitLength = droppedFilesArray.length;
         else {
           clearInterval(timer);
-          cb(droppedFilesArray.length);
+          cb();
         }
       }, 450);
 
@@ -64,7 +67,7 @@ window.dropzone = function(selector, options) {
     path = path || '';
     if(item.isFile) {
 
-      // dont need to upload hidden files which usually starts with dot
+      // dont need to upload hidden files which usually start with dot
       if(item.name.startsWith('.')) return false;
 
       item.file(file => {
@@ -82,7 +85,7 @@ window.dropzone = function(selector, options) {
     } else {
       let dirReader = item.createReader();
 
-      // dont need to upload hidden forders which usually starts with dot
+      // dont need to upload hidden folders which usually start with dot
       if(item.name.startsWith('.')) return false;
 
       dirReader.readEntries(function(entries) {
@@ -95,14 +98,18 @@ window.dropzone = function(selector, options) {
 };
 
 /**********************************************
-* TEST
+* TEST;
 **********************************************/
 
-dropzone('#dropzone', {
+let dropzoneSelector = '#dropzone',
+dz = document.querySelector(dropzoneSelector);
+
+dropzone(dropzoneSelector, {
   hoverClass: 'hovered',
   droppedClass: 'dropped',
   deniedClass: 'denied',
-  onloadend: send
+  onloadstart: preload,
+  onloadend: send,
 });
 
 /*
@@ -111,5 +118,10 @@ dropzone('#dropzone', {
 * filename and content of its
 */
 function send(files) {
-  alert(`You have uploaded ${files.length} files`);
+  dz.innerHTML = `You are ready to upload ${files.length} files`;
+}
+
+function preload() {
+  //do some preload stuff
+  dz.innerHTML = 'Detecting files...'
 }
