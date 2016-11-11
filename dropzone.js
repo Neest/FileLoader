@@ -11,6 +11,7 @@ window.dropzone = function(selector, options) {
       deniedClass = options.deniedClass || '',
       dropzone = document.querySelector(selector),
       loadend = options.onloadend,
+      loadevent = options.onload,
       loadstart = options.onloadstart,
       droppedFilesArray = [];
 
@@ -80,6 +81,14 @@ window.dropzone = function(selector, options) {
             content: e.target.result
           });
         };
+
+        fileReader.onprogress = function(e) {
+          loadevent({
+            index: droppedFilesArray.length + 1,
+            file: path + file.name
+          });
+        };
+
         fileReader.readAsBinaryString(file);
       });
     } else {
@@ -109,6 +118,7 @@ dropzone(dropzoneSelector, {
   droppedClass: 'dropped',
   deniedClass: 'denied',
   onloadstart: preload,
+  onload: onload,
   onloadend: send,
 });
 
@@ -119,6 +129,15 @@ dropzone(dropzoneSelector, {
 */
 function send(files) {
   dz.innerHTML = `You are ready to upload ${files.length} files`;
+}
+
+/*
+* @param object which contains index
+* of current file and its full path so
+* you can display this information
+*/
+function onload(args) {
+  console.log(`Processing file #${args.index}: ${args.file}`);
 }
 
 function preload() {
