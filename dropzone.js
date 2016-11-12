@@ -13,6 +13,7 @@ window.dropzone = function(selector, options) {
       loadend = options.onloadend,
       loadevent = options.onload,
       loadstart = options.onloadstart,
+      errorevent = options.onerror,
       droppedFilesArray = [];
 
   /**********************************************
@@ -89,6 +90,14 @@ window.dropzone = function(selector, options) {
           });
         };
 
+        fileReader.onerror = function(e) {
+          errorevent({
+            index: droppedFilesArray.length + 1,
+            file: path + file.name,
+            err: e
+          });
+        };
+
         fileReader.readAsBinaryString(file);
       });
     } else {
@@ -120,6 +129,7 @@ dropzone(dropzoneSelector, {
   onloadstart: preload,
   onload: onload,
   onloadend: send,
+  onerror: handleError
 });
 
 /*
@@ -143,4 +153,14 @@ function onload(args) {
 function preload() {
   //do some preload stuff
   dz.innerHTML = 'Detecting files...'
+}
+
+/*
+* @param object which contains index
+* of current file and error event with
+* full information about it
+*/
+function handleError(args) {
+  console.log(`Error occured while processing file #${args.index}: ${args.file}`);
+  console.log(`Error code: ${args.e.target.error.code}`);
 }

@@ -13,6 +13,7 @@ options can contain following properties:
 * onloadstart
 * onload
 * onloadend
+* onerror
 
 ## Restrictions
 So far, it works only for webkit-based browsers.
